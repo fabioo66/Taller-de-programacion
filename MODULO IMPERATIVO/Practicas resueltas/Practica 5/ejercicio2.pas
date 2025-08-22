@@ -1,237 +1,109 @@
+{Una agencia dedicada a la venta de autos ha organizado su stock y, dispone en papel de la
+información de los autos en venta. Implementar un programa que:
+a) Lea la información de los autos (patente, año de fabricación (2010..2018), marca y
+modelo) y los almacene en dos estructuras de datos:
+i. Una estructura eficiente para la búsqueda por patente.
+ii. Una estructura eficiente para la búsqueda por marca. Para cada marca se deben
+almacenar todos juntos los autos pertenecientes a ella.
+b) Invoque a un módulo que reciba la estructura generado en a) i y una marca y retorne la
+cantidad de autos de dicha marca que posee la agencia.
+c) Invoque a un módulo que reciba la estructura generado en a) ii y una marca y retorne
+la cantidad de autos de dicha marca que posee la agencia.
+d) Invoque a un módulo que reciba el árbol generado en a) i y retorne una estructura con
+la información de los autos agrupados por año de fabricación.
+e) Invoque a un módulo que reciba el árbol generado en a) i y una patente y devuelva el
+modelo del auto con dicha patente.
+f) Invoque a un módulo que reciba el árbol generado en a) ii y una patente y devuelva el
+modelo del auto con dicha patente.}
+
 program ejercicio2;
 type
-  arango= 2010..2018;
-  auto = record
-    patente: integer;
-    anioFabricacion: arango;
-    marca: string;
-    modelo: string;
-  end;
-  
-  arbolAuto = ^nodoAuto;
-  nodoAuto = record
-    dato: auto;
-    HI: arbolAuto;
-    HD: arbolAuto;
-  end;
-  
-  lista = ^nodoLista;
-  nodoLista = record
-    dato: auto;
-    sig: lista;
-  end;
-  
-  autoXMarca = record
-    marca: string;
-    autos: lista;
-  end;
-  
-  arbolXMarca = ^nodoXMarca;
-  nodoXMarca = record
-    dato: autoXMarca;
-    HI: arbolXMarca;
-    HD: arbolXMarca;
-  end;
-  
-  vector = array[arango]of lista;
-  
-procedure leerAuto(var c: auto);
+    aRango = 2010..2018;
+
+    auto = record 
+        patente: string;
+        anio: aRango;
+        marca: string;
+        modelo: string;
+    end;
+
+    arbolPatente = ^nodoPatente;
+    nodoPatente = record 
+        dato: auto;
+        HI: arbolPatente;
+        HD: arbolPatente;
+    end;
+
+    listaAutos = ^nodoAutos;
+    nodoAutos = record 
+        dato: auto;
+        sig: listaAutos;
+    end;
+
+    data = record 
+        marca: string;
+        lista: lista;
+    end;
+
+    arbolLista = ^nodoLista;
+    nodoLista = record 
+        dato: data;
+        HI: arbolLista;
+        HD: arbolLista;
+    end;
+
+procedure leerAuto(var a: auto);
 begin
-  writeln('Ingrese la patente del auto');
-  readln(c.patente);
-  if(c.patente <> -1)then begin
-    writeln('Ingrese el anio de fabricacion del auto');
-    //readln(c.anioFabricacion);
-    c.anioFabricacion:=random(9)+2010;
-    //random()*0.156;
-    writeln(c.anioFabricacion);
-    writeln('ingrese la marca del auto');
-    readln(c.marca);
-    writeln('Ingrese el modelo del auto');
-    readln(c.modelo);
-  end; 
+    writeln('Ingrese la patente del auto');
+    readln(a.patente);
+    if (a.patente <> 'zzz') then begin
+        writeln('Ingrese el año de fabricacion del auto');
+        readln(a.anio);
+        writeln('Ingrese la marca del auto');
+        readln(a.marca);
+        writeln('Ingrese el modelo del auto');
+        readln(a.modelo);
+    end;
 end;
 
-procedure agregarAuto(var a:arbolAuto; c: auto);
+procedure insertarPorPatente(var aP: arbolPatente; a: auto);
 begin
-  if(a = nil)then begin
-    new(a);
-    a^.dato:= c;
-    a^.HI:= nil;
-    a^.HD:= nil
-  end
-  else if(c.patente <= a^.dato.patente)then
-    agregarAuto(a^.HI, c)
-  else
-    agregarAuto(a^.HD, c);
-end;
-
-procedure agregarAdelante(var L: lista; c: auto);
-var
-  nue: lista;
-begin
-  new(nue);
-  nue^.dato:= c;
-  nue^.sig:= L;
-  L:= nue;
-end;
-
-procedure agregarXMarca(var a: arbolXMarca; c: auto);
-begin
-  if(a = nil)then begin
-    new(a);
-    a^.dato.marca:= c.marca;
-    a^.dato.autos:= nil;
-    agregarAdelante(a^.dato.autos, c);
-    a^.HI:= nil;
-    a^.HD:= nil
-  end
-  else begin
-    if(c.marca = a^.dato.marca)then
-      agregarAdelante(a^.dato.autos, c)
-    else if(c.marca <= a^.dato.marca)then
-      agregarXMarca(a^.HI, c)
-    else
-      agregarXMarca(a^.HD, c);
-  end;         
-end;
-
-procedure cargarArboles(var a1: arbolAuto; var a2:arbolXMarca);
-var
-  c: auto;
-begin
-  leerAuto(c);
-  if(c.patente <> -1)then begin
-    agregarAuto(a1, c);
-    agregarXMarca(a2,c);
-    cargarArboles(a1,a2);
-  end;  
-end;
-
-procedure cantAutosBrand(a: arbolAuto; brand: string; var cant: integer);
-begin
-  if(a <> nil)then begin
-    cantAutosBrand(a^.HI, brand,cant);
-    if(a^.dato.marca = brand)then 
-      cant:= cant + 1;
-    cantAutosBrand(a^.HD, brand, cant);
-  end;
-end;
-
-function recorrerLista(L: lista): integer;
-var
-  cant: integer;
-begin
-  cant:= 0;
-  while(L <> nil)do begin
-    cant:= cant + 1;
-    L:= L^.sig;
-  end;
-  recorrerLista:= cant;
-end;
-
-procedure cantAutosXMarca(a: arbolXMarca; marca: string; var cant: integer);
-begin
-  if(a <> nil)then begin
-    if(a^.dato.marca = marca)then 
-      cant:= recorrerLista(a^.dato.autos)
-    else if(marca > a^.dato.marca)then
-      cantAutosXMarca(a^.HD, marca, cant)
+    if (aP = nil) then begin
+        new(aP);
+        aP^.dato := a;
+        aP^.HI := nil;
+        aP^.HD := nil 
+    end
+    else if (a.patente <= aP^.dato.patente) then 
+        insertarPorPatente(ap^.HI, a)
     else 
-      cantAutosXMarca(a^.HI, marca, cant);
-  end;     
+        insertarPorPatente(ap^.HD, a);
 end;
 
-{function contarMarca(a: arbolXMarca; marca: string): integer;
+procedure agregarAdelante(var l: lista; d: data);
+var 
+    nue: lista;
 begin
-	if ( a = nil) then
-		contarMarca:=0
-	else begin
-		if (a^.dato.marca = marca)
-			contarMarca:=recorrerLista(a^.dato.autos)
-		else if (a^.dato.marca < marca)
-			contarMarca:=contarMarca(a^.hd,marca)
-		else
-			contarMarca:=contarMarca(a^.hi,marca);
-	end;
-end;}
-
-procedure inicializarVector(var v: vector);
-var
-	i:integer;
-begin
-	for i:= 2010 to 2018 do
-		v[i]:=nil;
+    new(nue);
+    nue^.dato := d;
+    nue^.sig := nil;
+    l := nue;
 end;
 
-procedure cargarVector(a:arbolAuto; var v:vector);
-begin
-  if(a <> nil)then begin
-    agregarAdelante(v[a^.dato.anioFabricacion], a^.dato);
-    cargarVector(a^.HI, v);
-    cargarVector(a^.HD, v);
-  end;
+procedure insertarPorMarca(var aL: arbolLista; d: data);
+begin 
+    if (aL = nil) then begin
+        new(aL);
+        aL^.dato := d;
+        aL^.dato := nil;
+        agregarAdelante(l, d);
+        aL^.HI := nil;
+        aL^.HD := nil
+    end 
+    else if (aL^.dato.marca = d.marca) then
+        agregarAdelante(l, d)
+    else if (d.marca <= aL^.dato.marca) then 
+        insertarPorMarca(aL^.HI, d)
+    else 
+        insertarPorMarca(aL^.HD, d);
 end;
-
-procedure buscarPatente(a:arbolAuto; patente: integer; var modelo: string);
-begin
-  if(a <> nil)then begin
-    if(patente = a^.dato.patente) then 
-      modelo:= a^.dato.modelo
-    else if(patente > a^.dato.patente)then 
-      buscarPatente(a^.HD, patente, modelo)
-    else
-      buscarPatente(a^.HI, patente, modelo);
-  end;      
-end;
-
-procedure buscarPatenteEnLista(L: lista; patente: integer; var encontre: boolean; var modelo:string);
-begin
-  encontre:= false;
-  while(L <> nil)and(encontre = false)do begin
-    if(patente = L^.dato.patente)then begin
-      encontre:= true;
-      modelo:= L^.dato.modelo;
-    end;  
-    L:= L^.sig;
-  end;
-end;
-
-procedure buscarPatenteXMarca(a:arbolXMarca; patente: integer; var encontre: boolean; var modelo: string);
-begin
-  if(a <> nil)and(encontre = false)then begin
-    buscarPatenteEnLista(a^.dato.autos, patente, encontre, modelo);
-    buscarPatenteXMarca(a^.HI, patente, encontre, modelo);
-    buscarPatenteXMarca(a^.HD, patente, encontre, modelo);
-  end;  
-end;
-
-VAR
-  a1: arbolAuto;
-  a2: arbolXMarca;
-  v: vector;
-  brand, modelo: string;
-  cant, patente: integer;
-  encontre: boolean;
-BEGIN
-	randomize;
-  cargarArboles(a1,a2);
-  writeln('Ingrese una marca');
-  readln(brand);
-  cant:= 0;
-  cantAutosBrand(a1, brand, cant);
-  writeln('La cantidad de autos de la misma marca es: ',cant);
-  cant:= 0;
-  cantAutosXMarca(a2, brand, cant);
-  writeln('La cantidad de autos de la misma marca es: ',cant);
-  inicializarVector(v);
-  cargarVector(a1,v);
-  writeln('Ingrese una patente de auto');
-  readln(patente);
-  buscarPatente(a1,	patente, modelo);
-  writeln('el modelo del auto con la patente ', patente, ' es ', modelo);
-  encontre:= false;
-  buscarPatenteXMarca(a2, patente, encontre, modelo);
-  if(encontre)then
-    writeln('el modelo del auto con la patente ', patente, ' es ', modelo);
-END.
