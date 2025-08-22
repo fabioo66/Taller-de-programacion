@@ -1,0 +1,165 @@
+programa finalNoviembre
+procesos
+  proceso juntarFlores
+  comenzar
+    repetir 5
+      tomarFlor
+  fin
+  proceso juntarPapeles
+  comenzar
+    repetir 5 
+      tomarPapel
+  fin
+  proceso colocarFlores
+  variables 
+    avRandom, caRandom: numero
+  comenzar
+    depositarFlor
+    repetir 4
+      Random(avRandom, 11, 15)
+      Random(caRandom, 11, 15)
+      Pos(avRandom, caRandom)
+      depositarFlor
+  fin
+  proceso etapaUnoFlores
+  variables
+    avRandom, caRandom: numero
+  comenzar
+    BloquearEsquina(18,13)
+    Pos(18,13)
+    juntarFlores
+    Random(avRandom, 11, 15)
+    Random(caRandom, 11, 15)
+    Pos(avRandom, caRandom)
+    LiberarEsquina(18,13)
+    colocarFlores
+    Pos(2,2)
+  fin 
+  proceso etapaDosFlores
+  variables
+    encontre: boolean
+    avRandom, caRandom: numero
+  comenzar
+    encontre := F
+    mientras (encontre = F)
+      Random(avRandom, 21,25)
+      Random(caRandom, 11, 15)
+      Pos(avRandom, caRandom)
+      si(HayPapelEnLaEsquina)
+        tomarPapel
+        encontre := V
+        BloquearEsquina(18,13)
+        Pos(18,13)
+        depositarPapel
+        Pos(2,2)
+        LiberarEsquina(18,13)
+  fin
+  proceso colocarPapeles
+  variables 
+    avRandom, caRandom: numero
+  comenzar
+    depositarPapel
+    repetir 4
+      Random(avRandom, 21, 25)
+      Random(caRandom, 11, 15)
+      Pos(avRandom, caRandom)
+      depositarPapel
+  fin
+  proceso etapaUnoPapeles
+  variables
+    avRandom, caRandom: numero
+  comenzar
+    BloquearEsquina(18,13)
+    Pos(18,13)   
+    juntarPapeles
+    Random(avRandom, 21,25)
+    Random(caRandom, 11, 15)
+    Pos(avRandom, caRandom)
+    LiberarEsquina(18,13)
+    colocarPapeles
+    Pos(3,3)
+  fin
+  proceso etapaDosPapeles
+  variables
+    encontre: boolean
+    avRandom, caRandom: numero
+  comenzar
+    encontre := F
+    mientras (encontre = F)
+      Random(avRandom, 11,15)
+      Random(caRandom, 11, 15)
+      Pos(avRandom, caRandom)
+      si(HayFlorEnLaEsquina)
+        tomarFlor
+        encontre := V
+        BloquearEsquina(18,13)
+        Pos(18,13)
+        depositarFlor
+        Pos(3,3)
+        LiberarEsquina(18,13)
+  fin
+areas
+  cuadradoA : AreaPC(11,11,15,15)
+  cuadradoB : AreaPC(21,11,25,15)
+  fuente : AreaPC(18,13,18,13)
+  areaFlorero : AreaP(2,2,2,2)
+  areaPapelero : AreaP(3,3,3,3)
+  areaFiscal : AreaP(1,1,1,1)
+robots 
+  robot robotFlorero
+  variables
+    quienSoy: numero
+    ready: boolean
+  comenzar
+    RecibirMensaje(quienSoy, robotFiscal)
+    etapaUnoFlores
+    EnviarMensaje(V, robotFiscal)
+    RecibirMensaje(ready, robotFiscal)
+    etapaDosFlores
+    EnviarMensaje(quienSoy, robotFiscal)
+  fin
+  robot robotPapelero
+  variables
+    quienSoy: numero
+    ready: boolean
+  comenzar
+    RecibirMensaje(quienSoy, robotFiscal)
+    etapaUnoPapeles
+    EnviarMensaje(V, robotFiscal)
+    RecibirMensaje(ready, robotFiscal)
+    etapaDosPapeles
+    EnviarMensaje(quienSoy, robotFiscal)
+  fin
+  robot robotFiscal
+  variables
+    ganador: numero
+    ready: boolean
+  comenzar
+    EnviarMensaje(1, robotFlorero)
+    EnviarMensaje(2, robotPapelero)
+    RecibirMensaje(ready, *)
+    RecibirMensaje(ready, *)
+    EnviarMensaje(V, robotPapelero)
+    EnviarMensaje(V, robotFlorero)
+    RecibirMensaje(ganador, *)
+    Informar(ganador)
+    RecibirMensaje(ganador, *)
+  fin
+variables
+  robotFlorero: robotFlorero
+  robotPapelero: robotPapelero
+  robotFiscal: robotFiscal
+comenzar
+  AsignarArea(robotFlorero, cuadradoA)
+  AsignarArea(robotFlorero, cuadradoB)
+  AsignarArea(robotFlorero, areaFlorero)
+  AsignarArea(robotFlorero, fuente)
+  AsignarArea(robotPapelero, cuadradoA)
+  AsignarArea(robotPapelero, cuadradoB)
+  AsignarArea(robotPapelero, areaPapelero)
+  AsignarArea(robotPapelero, fuente)
+  AsignarArea(robotFiscal, areaFiscal)
+  Iniciar(robotFlorero,2,2)
+  Iniciar(robotPapelero,3,3)
+  Iniciar(robotFiscal,1,1)
+fin

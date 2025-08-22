@@ -1,0 +1,92 @@
+programa nombre
+procesos
+  proceso darseVuelta
+  comenzar
+    repetir 2
+      derecha
+  fin
+  proceso izquierda
+  comenzar
+    repetir 3
+      derecha
+  fin
+  proceso tirarFlores
+  comenzar
+    mientras(HayFlorEnLaBolsa)
+      depositarFlor
+  fin
+  proceso juntarFlores
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+  fin
+  proceso depositarFlores(E avInicial: numero; E caInicial: numero E av: numero; E ca: numero)
+  comenzar
+    BloquearEsquina(av, ca)
+    Pos(av, ca)
+    tirarFlores
+    Pos(avInicial, caInicial)
+    LiberarEsquina(av,ca)
+  fin
+  proceso recorrido(E cant: numero)
+  comenzar
+    repetir cant
+      juntarFlores
+      mover
+    juntarFlores
+  fin
+areas
+  areaVeinteVeinte : AreaPC(20,20,20,20)
+  areaPrivadaVerticalAzul : AreaP(19,21,19,29)
+  areaPrivadaVerticalVerde : AreaP(21,21,21,29)
+  areaPrivadaHorizontalAzul : AreaP(9,20,18,20)
+  areaPrivadaHorizontalVerde : AreaP(22,20,31,20)
+  areaVerdeParcialmenteCompartida : AreaPC(21,20,21,20)
+  areaAzulParcialmenteCompartida : AreaPC(19,20,19,20)
+robots
+  robot vertical
+  comenzar
+    darseVuelta
+    recorrido(8)
+    si(PosAv = 19)
+      depositarFlores(PosAv, PosCa, 19, 20)
+      EnviarMensaje(V, robot4)
+    sino
+      depositarFlores(PosAv, PosCa, 21, 20)
+      EnviarMensaje(V, robot2)
+  fin
+  robot horizontal
+  variables
+    ready: boolean
+  comenzar
+    si(PosAv = 9)
+      derecha
+    sino
+      izquierda
+    recorrido(9)
+    RecibirMensaje(ready, *)
+    mover
+    juntarFlores
+    depositarFlores(PosAv, PosCa, 20, 20) 
+  fin
+variables
+  robot1: vertical
+  robot2: horizontal
+  robot3: vertical
+  robot4: horizontal
+comenzar
+  AsignarArea(robot4, areaVeinteVeinte)
+  AsignarArea(robot2, areaVeinteVeinte)
+  AsignarArea(robot1, areaPrivadaVerticalVerde)
+  AsignarArea(robot3, areaPrivadaVerticalAzul)
+  AsignarArea(robot2, areaPrivadaHorizontalVerde)
+  AsignarArea(robot4, areaPrivadaHorizontalAzul)
+  AsignarArea(robot1, areaVerdeParcialmenteCompartida)
+  AsignarArea(robot2, areaVerdeParcialmenteCompartida)
+  AsignarArea(robot4, areaAzulParcialmenteCompartida)
+  AsignarArea(robot3, areaAzulParcialmenteCompartida)
+  Iniciar(robot4, 9,20)
+  Iniciar(robot3, 19,29)
+  Iniciar(robot2, 31,20)
+  Iniciar(robot1, 21,29)
+fin 
